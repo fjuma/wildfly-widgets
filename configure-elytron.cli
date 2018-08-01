@@ -1,0 +1,30 @@
+# Create an Elytron filesystem based security realm
+/subsystem=elytron/filesystem-realm=exampleRealm:add(path=fs-realm-users,relative-to=jboss.server.config.dir)
+
+# Add user alice  
+/subsystem=elytron/filesystem-realm=exampleRealm:add-identity(identity=alice)  
+/subsystem=elytron/filesystem-realm=exampleRealm:set-password(identity=alice,clear={password=alice123+})
+/subsystem=elytron/filesystem-realm=exampleRealm:add-identity-attribute(identity=alice,name=Roles,value=[employee,admin])
+
+# Add user bob
+/subsystem=elytron/filesystem-realm=exampleRealm:add-identity(identity=bob)  
+/subsystem=elytron/filesystem-realm=exampleRealm:set-password(identity=bob,clear={password=bob123+})
+/subsystem=elytron/filesystem-realm=exampleRealm:add-identity-attribute(identity=bob,name=Roles,value=[employee])
+
+# Add exampleRealm to the ApplicationDomain’s security realms
+/subsystem=elytron/security-domain=ApplicationDomain:list-add(name=realms, value={realm=exampleRealm})  
+/subsystem=elytron/security-domain=ApplicationDomain:write-attribute(name=default-realm, value=exampleRealm)  
+
+## Add configuration to ensure our application will be secured by Elytron
+
+# Map security domain specified in the application to an Elytron security domain
+/subsystem=undertow/application-security-domain=other:add(security-domain=ApplicationDomain)
+/subsystem=ejb3/application-security-domain=other:add(security-domain=ApplicationDomain)
+
+# Update the http-remoting-connector to reference the SASL authentication
+# factory that is backed by our Elytron security domain
+/subsystem=remoting/http-connector=http-remoting-connector:write-attribute(name=sasl-authentication-factory, value=application-sasl-authentication)
+/subsystem=remoting/http-connector=http-remoting-connector:undefine-attribute(name=security-realm)
+
+# Once this operation is executed, our application will be secured by Elytron
+reload
