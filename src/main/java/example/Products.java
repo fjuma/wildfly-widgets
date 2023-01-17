@@ -1,6 +1,6 @@
 package example;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 import java.util.List;
 
 @Remote

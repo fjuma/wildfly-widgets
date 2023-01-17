@@ -13,18 +13,7 @@
 
 # Add exampleRealm to the ApplicationDomain’s security realms
 /subsystem=elytron/security-domain=ApplicationDomain:list-add(name=realms, value={realm=exampleRealm})  
-/subsystem=elytron/security-domain=ApplicationDomain:write-attribute(name=default-realm, value=exampleRealm)  
+/subsystem=elytron/security-domain=ApplicationDomain:write-attribute(name=default-realm, value=exampleRealm)
 
-## Add configuration to ensure our application will be secured by Elytron
-
-# Map security domain specified in the application to an Elytron security domain
-/subsystem=undertow/application-security-domain=other:add(security-domain=ApplicationDomain)
-/subsystem=ejb3/application-security-domain=other:add(security-domain=ApplicationDomain)
-
-# Update the http-remoting-connector to reference the SASL authentication
-# factory that is backed by our Elytron security domain
-/subsystem=remoting/http-connector=http-remoting-connector:write-attribute(name=sasl-authentication-factory, value=application-sasl-authentication)
-/subsystem=remoting/http-connector=http-remoting-connector:undefine-attribute(name=security-realm)
-
-# Once this operation is executed, our application will be secured by Elytron
+# Reload the server for the configuration to take effect
 reload
